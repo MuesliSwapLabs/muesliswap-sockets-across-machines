@@ -3,7 +3,7 @@
 
 Inspired by [cardano-node-socket-over-https](https://gimbalabs.com/dandelion/endpoints/cardano-node-socket)
 
-Basically a set of scripts that allows one to relatively easily map sockets via ssh between a server and a client that needs access to the corresponding socket.
+Basically a (currently) single script that allows one to relatively easily map sockets via ssh between a server and a client that needs access to the corresponding socket.
 This was made with Cardano Sockets in mind, but in theory can be generalized quite a bit.
 
 ## Setup
