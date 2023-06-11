@@ -1,15 +1,8 @@
 #!/usr/bin/env bash
 
+# Load Config
 RAND_STR=$(date +%s)
-# Config
-# TODO pjordan: Move this to an env file and source it here instead!
-SERVER_USER=trim
-SERVER_ADDRESS=onchain.muesliswap.com
-SERVER_PORT=18823
-SERVER_SOCKET_PATH=/home/cardano/cardano-node/db/socket
-
-CLIENT_PORT=18823
-CLIENT_SOCKET_PATH=./temp.socket
+source ENV
 
 # Check if socat is installed
 if ! which socat &> /dev/null; then
