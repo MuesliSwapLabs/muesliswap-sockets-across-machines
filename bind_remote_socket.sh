@@ -18,7 +18,7 @@ fi
 
 function map_remote() {
   echo "|> Starting socat on remote host"
-  ssh "$SERVER_USER@$SERVER_ADDRESS" "sudo socat \"UNIX-CONNECT:$SERVER_SOCKET_PATH\" \"TCP-LISTEN:$SERVER_PORT,fork,reuseaddr,\""
+  ssh "$SERVER_USER@$SERVER_ADDRESS" "sudo socat \"UNIX-CONNECT:$SERVER_SOCKET_PATH\" \"TCP-LISTEN:$SERVER_PORT,fork,reuseaddr\""
 }
 
 function connect_remote_client() {
@@ -28,7 +28,7 @@ function connect_remote_client() {
 
 function map_client() {
   echo "|> Mapping localhost port to socket file"
-  socat "TCP:localhost:$CLIENT_PORT" "UNIX-LISTEN:$CLIENT_SOCKET_PATH,fork,reuseaddr,unlink-early,"
+  socat -d "TCP:localhost:$CLIENT_PORT" "UNIX-LISTEN:$CLIENT_SOCKET_PATH,fork,unlink-early"
 }
 
 # Step 1: Start socat on remote and map to port
