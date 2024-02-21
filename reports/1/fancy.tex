@@ -1,0 +1,26 @@
+\usepackage{tcolorbox}
+\newtcolorbox{myquote}{colback=gray!5!white, colframe=gray!75!black}
+\renewenvironment{quote}{\begin{myquote}}{\end{myquote}}
+
+\usepackage{enumitem}
+\usepackage{amsfonts}
+
+% level one
+\setlist[itemize,1]{label=$\bullet$}
+% level two
+\setlist[itemize,2]{label=$\circ$}
+% level three
+\setlist[itemize,3]{label=$\star$}
+
+
+\usepackage{fancyvrb,newverbs,xcolor}
+
+\definecolor{Light}{HTML}{F4F4F4}
+
+\let\oldtexttt\texttt
+\renewcommand{\texttt}[1]{
+  \colorbox{Light}{\oldtexttt{#1}}
+}
+
+\usepackage{sectsty}
+\sectionfont{\clearpage}
