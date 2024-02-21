@@ -3,7 +3,7 @@
 
 Inspired by [cardano-node-socket-over-https](https://gimbalabs.com/dandelion/endpoints/cardano-node-socket)
 
-Basically a set of scripts that allows one to relatively easily map sockets via ssh between a server and a client that needs access to the corresponding socket.
+Basically a (currently) single script that allows one to relatively easily map sockets via ssh between a server and a client that needs access to the corresponding socket.
 This was made with Cardano Sockets in mind, but in theory can be generalized quite a bit.
 
 ## Setup
@@ -11,6 +11,10 @@ This was made with Cardano Sockets in mind, but in theory can be generalized qui
 Make sure socat is installed on your client and server.
 Additionally ensure that you have passwordless sudo access on the server.
 Copy the `ENV\_TEMPLATE` file to `ENV` and fill in the required information.
+
+Be careful that the ports you choose are unused (especially not by another socat or ssh instance), as the cleanup process of the script will kill remaining processes on these ports.
+If you have issues during port mapping kill the script using a Ctrl+C instead, to prevent the cleanup from killing the wrong process.
+You can also check the port beforehand using: `lsof -i :<PORT>` (make sure to test with sudo on the remote).
 
 ## Running
 
