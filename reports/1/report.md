@@ -20,10 +20,29 @@ At SAM's core is its CLI-based operation, necessitating users to prepare both cl
 ## Conclusion
 The Muesliswap SAM tool, with its innovative approach to remote socket communication, holds great promise for distributed network management. Addressing its current limitations with targeted solutions not only enhances its practicality but also positions it as an indispensable resource for network administrators and developers alike. Continuous refinement and community input are vital for its evolution into a fully realized, everyday utility.
 
+# MVP Functionality:
+
+## Configuration
+Create a new `ENV` file (see `ENV_TEMPLATE` as a reference)
+
+## Usage
+Run the following command from inside the root of the repository: `bash ./bind_remote_socket.sh`
+After that a new file according to `CLIENT_SOCKET_PATH` should be created that can be used for communication with the node (see screenshot below)
+
+![MVP Execution Example](./mvp_example.png)
+
+This channel can be used for one-off communication with the underlying node.
+Due to the issue discussed below however with each node interaction this socket has to be reopened.
+
+## Functionality
+Although not fully production ready, this MVP shows that the underlying idea can work without issues, as can be seen by the fact that the CLI is successfull in communication with a remote Node.
+To have a finished product, the issue of manual intervention to restart the script still has to be addressed, however there should be no issue with that.
+
 # Comprehensive Script Analysis: Facilitating Seamless Socket Communication
 
 ## Introduction
 The `bind_remote_socket.sh` Bash script facilitates secure, two-way communication between local and remote systems using `socat` and SSH tunneling, streamlining the process of socket forwarding and tunnel creation.
+
 
 ## Breakdown of Functional Steps
 
