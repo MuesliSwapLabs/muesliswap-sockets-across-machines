@@ -1,1 +1,5 @@
 ENV
+ENV.*
+nohup.out
+__pycache__
+venv
