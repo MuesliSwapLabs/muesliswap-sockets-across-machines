@@ -26,11 +26,14 @@ def relay_connection(source_conn, dest_socket_path):
     print(f" |> Connection opened by {source_conn}")
     with socket.socket(socket.AF_UNIX, socket.SOCK_STREAM) as dest_sock:
         with dest_socket_path.get_path() as dest_socket_rpath:
+            print(f" |> Connecting to {dest_socket_rpath}")
             dest_sock.connect(dest_socket_rpath)
             while True:
                 data = source_conn.recv(BLOCK_SIZE)
                 if not data:
+                    print(f" |> Connection ({dest_socket_rpath}) closed by client")
                     break  # Connection closed by the client
+                print(f" |> Connection ({dest_socket_rpath}) sending data")
                 dest_sock.sendall(data)
 
 
