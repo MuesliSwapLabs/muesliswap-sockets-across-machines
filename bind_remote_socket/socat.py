@@ -11,18 +11,16 @@ from paramiko import SSHClient, AutoAddPolicy, PasswordRequiredException, RSAKey
 from typing import Any
 
 from .forwarder import forward_tunnel
-from . import VERBOSE_SOCAT
+from . import VERBOSE_SOCAT, DEBUG_SOCAT
+
+
+_debug_flag = '-ddd' if DEBUG_SOCAT else ''
 
 def verbose(s):
     if VERBOSE_SOCAT:
         print(s)
 
-def run_remote_socat(ssh_client, path, port, ready_event, error_event):
-    print(" |> Starting the server side socat instance")
-    verbose(f"[SOCAT SERVER]> Checking remote...")
-    command = f'sudo socat -ddd UNIX-CONNECT:{path} TCP-LISTEN:{port},fork,reuseaddr'
-
-    check_pgrep = False
+def kill_on_remote_port(ssh_client, port):
     pids = []
     (_,stdout,_) = ssh_client.exec_command(f"sudo lsof -i :{port}")
     for i, line in enumerate(iter(stdout.readline, "")):
@@ -33,10 +31,19 @@ def run_remote_socat(ssh_client, path, port, ready_event, error_event):
     errors = []
     for (name, pid) in pids:
         if name == "socat":
-            verbose(f"[SOCAT SERVER]> Killing leftover socat instance...")
+            verbose(f"[SOCAT SERVER]> Killing socat instance...")
             ssh_client.exec_command(f"sudo kill -9 {pid}")
         else:
             errors.append(name)
+    return errors
+
+def run_remote_socat(ssh_client, path, port, ready_event, error_event):
+    print(" |> Starting the server side socat instance")
+    verbose(f"[SOCAT SERVER]> Checking remote...")
+    command = f'sudo socat {_debug_flag} UNIX-CONNECT:{path} TCP-LISTEN:{port},fork,reuseaddr'
+
+    verbose(f"[SOCAT SERVER]> Killing left over socat instance...")
+    errors = kill_on_remote_port(ssh_client, port)
     if errors:
         print(f"[SOCAT SERVER](ERROR)> Port already in use by {errors}")
         error_event.set()
@@ -73,7 +80,7 @@ def run_remote_socat(ssh_client, path, port, ready_event, error_event):
 
 def run_socat_client_side(port, file, ready_event, error_event):
     print(" |> Starting the client side socat instance")
-    client_command = f'socat -ddd "TCP:localhost:{port}" "UNIX-LISTEN:{file},fork,unlink-early"'
+    client_command = f'socat {_debug_flag} "TCP:localhost:{port}" "UNIX-LISTEN:{file},fork,unlink-early"'
     verbose(f"[SOCAT CLIENT]> Running Command: {client_command}")
     process = subprocess.Popen(
         shlex.split(client_command),

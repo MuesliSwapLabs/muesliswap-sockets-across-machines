@@ -1,5 +1,6 @@
 import os
 import socket
+import queue
 import threading
 
 from . import VERBOSE_CONNECTION, BLOCK_SIZE
@@ -9,7 +10,7 @@ def verbose(s):
         print(f" |> {s}")
 
 
-# Helper function that is used in threads
+# Helper function that is used in threads 
 def relay_connection(source_conn, dest_socket_path):
     """
     Relays communication from a source connection to the destination socket.
@@ -40,12 +41,25 @@ def relay_connection(source_conn, dest_socket_path):
                     break
 
 
+def relay_worker(q):
+    while True:
+        (con, spath) = q.get()
+        relay_connection(con, spath)
+        
+        # Mark the task as done
+        q.task_done()
 
 
 def listen_and_relay(source_socket_path, destination_socket_path):
     """
     Listens for new connections on the source socket and relays communication to the destination socket.
     """
+
+    # Start a worker thread to go through connections
+    q = queue.Queue()
+    worker = threading.Thread(target=relay_worker, args=(q,))
+    worker.start()
+
     with socket.socket(socket.AF_UNIX, socket.SOCK_STREAM) as sock:
         sock.bind(source_socket_path.path)
         sock.listen(1)
@@ -54,5 +68,9 @@ def listen_and_relay(source_socket_path, destination_socket_path):
             connection, client_address = sock.accept()
             print(f" |> Accepting connection from {client_address})")
             verbose(f"Connection: {connection}")
-            threading.Thread(target=relay_connection, args=(
-                connection, destination_socket_path)).start()
+            #threading.Thread(target=relay_connection, args=(
+            #    connection, destination_socket_path)).start()
+            #relay_connection(connection, destination_socket_path)
+            q.put((connection, destination_socket_path))
+
+    worker.stop()

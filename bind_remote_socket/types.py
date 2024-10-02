@@ -11,13 +11,13 @@ from paramiko import SSHClient, AutoAddPolicy, PasswordRequiredException, RSAKey
 from typing import Any
 
 from .forwarder import forward_tunnel
-from .socat import run_remote_socat, run_socat_client_side
+from .socat import run_remote_socat, run_socat_client_side, kill_on_remote_port
 
 from . import VERBOSE_TYPES
 
 def verbose(s):
     if VERBOSE_TYPES:
-        print(f" |> {s}")
+        print(s)
 
 class CustomPath:
     def get_path(self):
@@ -39,7 +39,6 @@ class UrlPath(CustomPath):
     def get_path(self):
         return (hostname, port)
 
-
 @dataclass(frozen=True)
 class SshPath(CustomPath):
     path: str
@@ -49,14 +48,23 @@ class SshPath(CustomPath):
 
     ssh_pkey: Any
 
-    temp_port_src = 4041
-    temp_port_dst = 4042
+    _counter = 0
+    _port_src = 4041
+    _port_dst = 4042
     temp_file = "/tmp/muesli-sam.socket"
+
 
     @contextmanager
     def get_path(self):
+        # Rotate through multiple ports, to account for connection teardown
+        counter = self._counter
+        object.__setattr__(self, "_counter", (self._counter + 1) % 10)
+        port_src = self._port_src + counter
+        port_dst = self._port_dst + counter
+
         ssh = None
         ssh_tunnel = None
+        remote_socat = None
         try:
             # Create a new socket mapping from the remote host to a local file
 
@@ -72,7 +80,7 @@ class SshPath(CustomPath):
             print(" |> Starting server side socat instance")
             error_event = threading.Event()
             server_socat_ready = threading.Event()
-            remote_socat = threading.Thread(target=run_remote_socat, args=(ssh, self.path, self.temp_port_src, server_socat_ready, error_event))
+            remote_socat = threading.Thread(target=run_remote_socat, args=(ssh, self.path, port_src, server_socat_ready, error_event))
             remote_socat.daemon = True
             remote_socat.start()
 
@@ -86,16 +94,16 @@ class SshPath(CustomPath):
             print(" |> Starting tunnel between server and client")
             # Map remote port to localhost (in case ports are not opened publicly)
             ssh_tunnel = forward_tunnel(
-                self.temp_port_dst,
+                port_dst,
                 '127.0.0.1',
-                self.temp_port_src,
+                port_src,
                 ssh.get_transport()
             )
 
             # Run the client side socat command and ensure it's properly cleaned up
             # when the process is terminated
             client_socat_ready = threading.Event()
-            client_socat_thread = threading.Thread(target=run_socat_client_side, args=(self.temp_port_dst, self.temp_file, client_socat_ready, error_event))
+            client_socat_thread = threading.Thread(target=run_socat_client_side, args=(port_dst, self.temp_file, client_socat_ready, error_event))
             client_socat_thread.daemon = True  # Use a daemon thread to allow clean exit
             client_socat_thread.start()
 
@@ -119,7 +127,18 @@ class SshPath(CustomPath):
             yield (self.temp_file)
         finally:
             print(" |> Cleaning up connection...")
-            # Close the SSH connection
-            if ssh: ssh.close()
             # Close the SSH tunnel
-            if ssh_tunnel: ssh_tunnel.shutdown()
+            if ssh_tunnel: 
+                verbose(" |> Closing ssh tunnel")
+                ssh_tunnel.shutdown()
+            # Close socat
+            if remote_socat.is_alive(): 
+                verbose(" |> Killing socat")
+                errors = kill_on_remote_port(ssh, port_src)
+                if errors:
+                    verbose(f" |> Got errors: {errors}")
+            # Close the SSH connection
+            if ssh: 
+                verbose(" |> Closing ssh client")
+                ssh.close()
+

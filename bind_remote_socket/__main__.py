@@ -73,9 +73,9 @@ def parse_url_path_arg(arg):
 
 if __name__ == "__main__":
     # Define the path for the source and destination socket files
-    print(" |> Parsing source arg...")
+    verbose(" |> Parsing source arg...")
     source_socket_path = parse_url_path_arg(sys.argv[1])
-    print(" |> Parsing dest arg...")
+    verbose(" |> Parsing dest args...")
     destination_socket_path = parse_url_path_arg(sys.argv[2])
 
     if not isinstance(source_socket_path, LocalPath):
@@ -83,7 +83,7 @@ if __name__ == "__main__":
         exit(1)
 
     # Ensure the socket file does not already exist
-    print(" |> Ensuring socket file does not exist...")
+    verbose(" |> Ensuring socket file does not exist...")
     if os.path.exists(source_socket_path.path):
         verbose("File exists, unlinking...")
         os.unlink(source_socket_path.path)
