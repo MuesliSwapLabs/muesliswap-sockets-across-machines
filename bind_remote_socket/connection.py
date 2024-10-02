@@ -29,10 +29,15 @@ def relay_connection(source_conn, dest_socket_path):
                 verbose(f" |> Sending data to connection ({dest_socket_rpath})")
                 verbose(f"Data ({len(data)}b): {data}")
                 dest_sock.send(data)
-                response = dest_sock.recv(BLOCK_SIZE)
-                verbose(f" |> Receiving response from connection ({dest_socket_rpath})")
-                verbose(f"Response ({len(response)}b): {response}")
-                source_conn.send(response)
+                dest_sock.settimeout(2)
+                try:
+                    response = dest_sock.recv(BLOCK_SIZE)
+                    dest_sock.settimeout(None)
+                    verbose(f" |> Receiving response from connection ({dest_socket_rpath})")
+                    verbose(f"Response ({len(response)}b): {response}")
+                    source_conn.send(response)
+                except TimeoutError:
+                    break
 
 
 

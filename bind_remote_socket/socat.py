@@ -102,5 +102,5 @@ def run_socat_client_side(port, file, ready_event, error_event):
 
 
     # Wait for the process to complete
-    process.join()
+    process.wait()
     verbose("[SOCAT CLIENT]> Instance terminated.")
