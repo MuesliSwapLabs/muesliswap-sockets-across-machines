@@ -26,13 +26,14 @@ def relay_connection(source_conn, dest_socket_path):
                 if not data:
                     print(f" |> Connection ({dest_socket_rpath}) closed by client")
                     break  # Connection closed by the client
-                print(f" |> Sending data to connection ({dest_socket_rpath})")
+                verbose(f" |> Sending data to connection ({dest_socket_rpath})")
                 verbose(f"Data ({len(data)}b): {data}")
                 dest_sock.send(data)
                 response = dest_sock.recv(BLOCK_SIZE)
-                print(f" |> Receiving response from connection ({dest_socket_rpath})")
+                verbose(f" |> Receiving response from connection ({dest_socket_rpath})")
                 verbose(f"Response ({len(response)}b): {response}")
                 source_conn.send(response)
+
 
 
 
