@@ -3,29 +3,32 @@
 
 Inspired by [cardano-node-socket-over-https](https://gimbalabs.com/dandelion/endpoints/cardano-node-socket)
 
-Basically a (currently) single script that allows one to relatively easily map sockets via ssh between a server and a client that needs access to the corresponding socket.
+A script that allows one to easily map sockets securely via ssh between a server and a client that needs access to the corresponding socket.
 This was made with Cardano Sockets in mind, but in theory can be generalized quite a bit.
 
-## Setup
+## Requirements
+### Client
+ * just
+ * socat
+ * python3
+### Server
+ * socat
 
-Make sure socat is installed on your client and server.
-Additionally ensure that you have passwordless sudo access on the server.
-Copy the `ENV\_TEMPLATE` file to `ENV` and fill in the required information.
+## Setup & Usage
+Make sure you fulfill the *Requirements* on both your client and server first, before continuing.
+Additionally, it is currently a requirement to have password-less sudo access for the remote user.
 
-Be careful that the ports you choose are unused (especially not by another socat or ssh instance), as the cleanup process of the script will kill remaining processes on these ports.
-If you have issues during port mapping kill the script using a Ctrl+C instead, to prevent the cleanup from killing the wrong process.
-You can also check the port beforehand using: `lsof -i :<PORT>` (make sure to test with sudo on the remote).
+ 1. `just setup`
+ 2. `just run <REMOTE_NODE_SOCKET_PATH>`
 
-## Running
+This will create a local `node.socket` file, which can be used to interact with the cardano node.
+ e.g. `just run user@my.server.com:/home/cardano/cardano-node/db/node.socket` would create a connection to the socket file located at `/home/cardano/cardano-node/db/node.socket` on the server `my.server.com`.
 
-Simply execute `./bind_remote_socket.sh`
-After everything is setup simply press enter to terminate the connection.
-Beware that currently the remote port is opened publicly (unless otherwise specified by a firewall), which might give outsiders unwanted access to your node.
 
+Be careful that the ports you choose are unused (especially not by another socat or ssh instance), as the script will kill remaining processes on these ports.
 
 ## FAQ
 
 ### Do I really need passwordless sudo on the remote?
 No, you don't necessarily. If you are sure that the permissions of the socket file you are trying to map allow your login user to read and write to and from the socket file, feel free to adapt the script to no longer use sudo.
-You can simply remove the sudo prefix in the map\_remote function.
 
