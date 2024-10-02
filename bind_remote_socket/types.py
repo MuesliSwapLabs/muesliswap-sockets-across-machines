@@ -136,8 +136,8 @@ class SshPath(CustomPath):
 
     @contextmanager
     def get_path(self):
-        tunnel = None
         ssh = None
+        ssh_tunnel = None
         try:
             # Create a new socket mapping from the remote host to a local file
 
@@ -166,7 +166,7 @@ class SshPath(CustomPath):
 
             print(" /> Starting tunnel between server and client")
             # Map remote port to localhost (in case ports are not opened publicly)
-            forward_tunnel(
+            ssh_tunnel = forward_tunnel(
                 self.temp_port_dst,
                 '127.0.0.1',
                 self.temp_port_src,
@@ -201,7 +201,7 @@ class SshPath(CustomPath):
             yield (self.temp_file)
         finally:
             print(" |> Cleaning up...")
-            # Close the port tunnel
-            if tunnel: tunnel.close()
             # Close the SSH connection
             if ssh: ssh.close()
+            # Close the SSH tunnel
+            if ssh_tunnel: ssh_tunnel.shutdown()
