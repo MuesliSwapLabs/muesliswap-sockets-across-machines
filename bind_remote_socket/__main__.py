@@ -31,10 +31,10 @@ def get_default_ssh_key_path():
     return None
 
 def parse_url_path_arg(arg):
-    verbose("Checking if arg is SSH-like")
     # Try to detect an SSH style URL
     pattern = "((?P<username>[^@]*)@)?(?P<hostname>[^:]*)(?P<port>[0-9]{1,7})?:(?P<path>.*)"
     if match := re.match(pattern, arg):
+        verbose("Found SSH-like")
         key_filename = get_default_ssh_key_path()
         pw = None
         while pw is None:
@@ -42,7 +42,7 @@ def parse_url_path_arg(arg):
             try:
                 key = RSAKey.from_private_key_file(key_filename, password=pw)
             except:
-                print(" /> Invalid password...")
+                print(" |> Invalid password...")
                 pw = None
         verbose("Password correct.")
 
@@ -55,19 +55,19 @@ def parse_url_path_arg(arg):
             )
 
 
-    verbose("Checking if arg is URL-like")
     # Try to detect an URL
     url = urlparse(arg)
     if url.netloc and not url.path:
         if not url.scheme:
             url = urlparse(f"http://{arg}")
+        verbose("Found URL-like")
         return UrlPath(
                 hostname=url.hostname,
                 port=url.port,
                 path=url.path
             )
 
-    verbose("Falling back to path")
+    verbose("Found local path")
     # Fallback case: Local path to file
     return LocalPath(path=arg)
 

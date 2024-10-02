@@ -33,11 +33,6 @@ def relay_connection(source_conn, dest_socket_path):
                 print(f" |> Receiving response from connection ({dest_socket_rpath})")
                 verbose(f"Response ({len(response)}b): {response}")
                 source_conn.send(response)
-                print("Waiting (response)?")
-                print("Waiting (recv)?")
-            print("Exited loop")
-        print("Exited socket")
-
 
 
 
@@ -51,6 +46,7 @@ def listen_and_relay(source_socket_path, destination_socket_path):
         print(f" |> Listening for connections on {source_socket_path}")
         while True:
             connection, client_address = sock.accept()
-            verbose(f"Accepting connection from {client_address}: {connection}")
+            print(f" |> Accepting connection from {client_address})")
+            verbose(f"Connection: {connection}")
             threading.Thread(target=relay_connection, args=(
                 connection, destination_socket_path)).start()

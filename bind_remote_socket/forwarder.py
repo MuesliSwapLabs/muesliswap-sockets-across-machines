@@ -67,18 +67,6 @@ class Handler(SocketServer.BaseRequestHandler):
         verbose("Tunnel closed from %r" % (peername,))
 
 
-# def forward_tunnel(local_port, remote_host, remote_port, transport):
-#     # this is a little convoluted, but lets me configure things for the Handler
-#     # object.  (SocketServer doesn't give Handlers any way to access the outer
-#     # server normally.)
-#     class SubHander(Handler):
-#         chain_host = remote_host
-#         chain_port = remote_port
-#         ssh_transport = transport
-# 
-#     ForwardServer(("", local_port), SubHander).serve_forever()
-
-
 def forward_tunnel(local_port, remote_host, remote_port, transport):
     class SubHandler(Handler):
         chain_host = remote_host
