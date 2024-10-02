@@ -6,13 +6,13 @@ try:
 except ImportError:
     import socketserver as SocketServer
 
-import paramiko
+
+from . import VERBOSE_FORWARDER
 
 
-g_verbose = True
 def verbose(s):
-    if g_verbose:
-        print(s)
+    if VERBOSE_FORWARDER:
+        print(f"[PORT TUNNEL]> {s}")
 
 class ForwardServer(SocketServer.ThreadingTCPServer):
     daemon_threads = True
@@ -92,7 +92,7 @@ def forward_tunnel(local_port, remote_host, remote_port, transport):
     server_thread.daemon = True  # Use a daemon thread to allow clean exit
     server_thread.start()
 
-    print(f"Started tunnel on localhost:{local_port} -> {remote_host}:{remote_port}")
+    print(f"[PORT TUNNEL]> Started tunnel on localhost:{local_port} -> {remote_host}:{remote_port}")
 
     # Return the server object so you can manage it (e.g., shut it down later)
     return server
