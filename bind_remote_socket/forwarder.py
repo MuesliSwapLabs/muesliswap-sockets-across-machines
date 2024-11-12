@@ -14,6 +14,7 @@ def verbose(s):
     if VERBOSE_FORWARDER:
         print(f"[PORT TUNNEL]> {s}")
 
+
 class ForwardServer(SocketServer.ThreadingTCPServer):
     daemon_threads = True
     allow_reuse_address = True
@@ -80,7 +81,8 @@ def forward_tunnel(local_port, remote_host, remote_port, transport):
     server_thread.daemon = True  # Use a daemon thread to allow clean exit
     server_thread.start()
 
-    verbose(f"Started tunnel on localhost:{local_port} -> {remote_host}:{remote_port}")
+    verbose(f"Started tunnel on localhost:{
+            local_port} -> {remote_host}:{remote_port}")
 
     # Return the server object so you can manage it (e.g., shut it down later)
     return server
