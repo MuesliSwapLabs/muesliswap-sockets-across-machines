@@ -13,9 +13,10 @@ def verbose(s):
         print(s)
 
 
-def kill_on_remote_port(ssh_client, port):
+def kill_on_remote_port(ssh_client, port, use_sudo=False):
     pids = []
-    (_, stdout, _) = ssh_client.exec_command(f"sudo lsof -i :{port}")
+    (_, stdout, _) = ssh_client.exec_command(
+        f"{'sudo ' if use_sudo else ''}lsof -i :{port}")
     for i, line in enumerate(iter(stdout.readline, "")):
         if i > 0:
             ls = line.split()
@@ -25,20 +26,23 @@ def kill_on_remote_port(ssh_client, port):
     for (name, pid) in pids:
         if name == "socat":
             verbose("[SOCAT SERVER]> Killing socat instance...")
-            ssh_client.exec_command(f"sudo kill -9 {pid}")
+            ssh_client.exec_command(
+                f"{'sudo ' if use_sudo else ''}kill -9 {pid}")
         else:
             errors.append(name)
     return errors
 
 
-def run_remote_socat(ssh_client, path, port, ready_event, error_event):
+def run_remote_socat(
+    ssh_client, path, port, ready_event, error_event, use_sudo=False
+):
     print(" |> Starting the server side socat instance")
     verbose("[SOCAT SERVER]> Checking remote...")
-    command = f'sudo socat {
+    command = f'{"sudo " if use_sudo else ""}socat {
         _debug_flag} UNIX-CONNECT:{path} TCP-LISTEN:{port},fork,reuseaddr'
 
     verbose("[SOCAT SERVER]> Killing left over socat instance...")
-    errors = kill_on_remote_port(ssh_client, port)
+    errors = kill_on_remote_port(ssh_client, port, use_sudo)
     if errors:
         print(f"[SOCAT SERVER](ERROR)> Port already in use by {errors}")
         error_event.set()
@@ -75,9 +79,12 @@ def run_remote_socat(ssh_client, path, port, ready_event, error_event):
     verbose("[SOCAT SERVER]> Instance terminated.")
 
 
-def run_socat_client_side(port, file, ready_event, error_event):
+def run_socat_client_side(
+        port, file, ready_event, error_event, use_sudo=False
+):
     print(" |> Starting the client side socat instance")
-    client_command = f'socat {_debug_flag} "TCP:localhost:{
+    client_command = f'{"sudo " if use_sudo else ""}socat {
+        _debug_flag} "TCP:localhost:{
         port}" "UNIX-LISTEN:{file},fork,unlink-early"'
     verbose(f"[SOCAT CLIENT]> Running Command: {client_command}")
     process = subprocess.Popen(

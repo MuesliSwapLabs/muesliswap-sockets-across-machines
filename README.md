@@ -42,7 +42,6 @@ In distributed environments, accessing a remote Cardano node via its socket secu
 - **Just**: Command run helper, which is used to setup and start the server.
 - **Python 3.6+**: Ensure Python is installed on both the client and server machines.
 - **SSH Access**: SSH key-based authentication set up between the client and server.
-- **Sudo Access**: Ensure that there is passwordless sudo access on server.
 - **Cardano Node**: A running Cardano node on the server machine.
 - **Operating System**: Compatible with Unix-like systems (Linux, macOS).
 
@@ -78,9 +77,12 @@ On the **client machine** where you want to access the Cardano node:
    ```
 
    - Replace `your.server.ip` with the server's IP address or hostname.
-   - Replace `user` with the user for which SSH access and passwordless sudo has been setup
+   - Replace `user` with the user for which SSH access
    - Replace `/path/to/node/socket/file` with the remote path to the Cardano Node Socket file
    - Replace `./node.socket` with the path where you want the socket file to be created
+
+   Optionally you can also set the `SAM_USE_SUDO_REMOTE` or `SAM_USE_SUDO_CLIENT` environment variables in case you would like to start `socat` as root.
+   This requires that passwordless `sudo` is setup for the corresponding `user`.
 
 2. **Set Environment Variable**:
 

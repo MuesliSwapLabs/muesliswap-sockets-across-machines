@@ -46,14 +46,17 @@ def relay_connection(source_conn, dest_socket_path):
 
 def relay_worker(q):
     while True:
-        (con, spath) = q.get()
+        (con, spath, use_sudo) = q.get()
         relay_connection(con, spath)
 
         # Mark the task as done
         q.task_done()
 
 
-def listen_and_relay(source_socket_path, destination_socket_path):
+def listen_and_relay(
+    source_socket_path,
+    destination_socket_path,
+):
     """
     Listens for new connections on the source socket
     and relays communication to the destination socket.

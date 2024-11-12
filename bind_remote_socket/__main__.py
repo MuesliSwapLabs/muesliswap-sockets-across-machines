@@ -81,8 +81,15 @@ if __name__ == "__main__":
     destination_socket_path = parse_url_path_arg(sys.argv[2])
 
     if not isinstance(source_socket_path, LocalPath):
-        print("Unsupported source file path!" +
+        print("Unsupported source argument!" +
               " Please use a local file path instead")
+        exit(1)
+    if isinstance(destination_socket_path, LocalPath):
+        print("Unnecessary local-to-local mapping. " +
+              "Directly access the socket file.")
+        exit(1)
+    if isinstance(destination_socket_path, UrlPath):
+        print("Only ssh remotes are supported.")
         exit(1)
 
     # Ensure the socket file does not already exist

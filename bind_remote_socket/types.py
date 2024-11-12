@@ -58,7 +58,7 @@ class SshPath(CustomPath):
     temp_file = "/tmp/muesli-sam.socket"
 
     @contextmanager
-    def get_path(self):
+    def get_path(self, use_sudo=False):
         # Rotate through multiple ports, to account for connection teardown
         counter = self._counter
         object.__setattr__(self, "_counter", (self._counter + 1) % 10)
@@ -82,10 +82,14 @@ class SshPath(CustomPath):
             # Run the server side socat command, and ensure it's properly
             # cleaned up when the SSH connection is closed
             print(" |> Starting server side socat instance")
+            use_sudo_on_remote = "SAM_USE_SUDO_REMOTE" in os.environ and \
+                os.environ["SAM_USE_SUDO_REMOTE"]
             error_event = threading.Event()
             server_socat_ready = threading.Event()
             remote_socat = threading.Thread(target=run_remote_socat, args=(
-                ssh, self.path, port_src, server_socat_ready, error_event))
+                ssh, self.path, port_src,
+                server_socat_ready, error_event, use_sudo_on_remote
+            ))
             remote_socat.daemon = True
             remote_socat.start()
 
@@ -110,10 +114,14 @@ class SshPath(CustomPath):
 
             # Run the client side socat command and ensure it's properly
             # cleaned up when the process is terminated
+            use_sudo_on_client = "SAM_USE_SUDO_CLIENT" in os.environ and \
+                os.environ["SAM_USE_SUDO_CLIENT"]
             client_socat_ready = threading.Event()
             client_socat_thread = threading.Thread(
                 target=run_socat_client_side, args=(
-                    port_dst, self.temp_file, client_socat_ready, error_event))
+                    port_dst, self.temp_file, client_socat_ready,
+                    error_event, use_sudo_on_client
+                ))
             # Use a daemon thread to allow clean exit
             client_socat_thread.daemon = True
             client_socat_thread.start()
