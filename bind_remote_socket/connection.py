@@ -46,7 +46,7 @@ def relay_connection(source_conn, dest_socket_path):
 
 def relay_worker(q):
     while True:
-        (con, spath, use_sudo) = q.get()
+        (con, spath) = q.get()
         relay_connection(con, spath)
 
         # Mark the task as done
