@@ -98,8 +98,8 @@ On the **client machine** where you want to access the Cardano node:
 
 ### Example
 
-A video demonstration showcasing the setup and usage is available on [YouTube](https://www.youtube.com/watch?v=R2UPOUbuo5U) and as a 
-[direct download](https://github.com/MuesliSwapLabs/muesliswap-sockets-across-machines/blob/main/reports/2/example_usage.avi).
+A video demonstration showcasing the setup and usage is available on [YouTube](https://youtu.be/kJn3Bvn2qnQ) and as a 
+[direct download](https://github.com/MuesliSwapLabs/muesliswap-sockets-across-machines/blob/main/reports/3/demo.mp4).
 
 ## Troubleshooting
 
